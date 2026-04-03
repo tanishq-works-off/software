@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Lab Test Record System</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+body {
+    font-family: Arial;
+    background: #f4f4f4;
+    padding: 20px;
+}
+.container {
+    max-width: 800px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+input, button {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+}
+button {
+    background: black;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+.record {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-top: 10px;
+}
+.qr {
+    margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>Lab Test Record System</h2>
+
+    <input type="text" id="name" placeholder="Patient Name">
+    <input type="text" id="test" placeholder="Test Type">
+    <input type="text" id="result" placeholder="Result">
+
+    <button onclick="saveRecord()">Save Record</button>
+
+    <h3>Records</h3>
+    <div id="records"></div>
+</div>
+
+<script>
+let records = JSON.parse(localStorage.getItem("records")) || [];
+let serial = localStorage.getItem("serial") || 1;
+
+function saveRecord() {
+    let name = document.getElementById("name").value;
+    let test = document.getElementById("test").value;
+    let result = document.getElementById("result").value;
+
+    if (!name || !test || !result) {
+        alert("Fill all fields!");
+        return;
+    }
+
+    let record = {
+        serial: serial,
+        name: name,
+        test: test,
+        result: result
+    };
+
+    records.push(record);
+    localStorage.setItem("records", JSON.stringify(records));
+
+    serial++;
+    localStorage.setItem("serial", serial);
+
+    displayRecords();
+}
+
+function displayRecords() {
+    let container = document.getElementById("records");
+    container.innerHTML = "";
+
+    records.forEach((r, index) => {
+        let div = document.createElement("div");
+        div.className = "record";
+
+        div.innerHTML = `
+            <strong>Serial No:</strong> ${r.serial} <br>
+            <strong>Name:</strong> ${r.name} <br>
+            <strong>Test:</strong> ${r.test} <br>
+            <strong>Result:</strong> ${r.result}
+            <div id="qr${index}" class="qr"></div>
+        `;
+
+        container.appendChild(div);
+
+        new QRCode(document.getElementById(`qr${index}`), {
+            text: `Serial:${r.serial}, Name:${r.name}, Test:${r.test}, Result:${r.result}`,
+            width: 100,
+            height: 100
+        });
+    });
+}
+
+displayRecords();
+</script>
+
+</body>
+</html>
